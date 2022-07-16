@@ -7,8 +7,12 @@ import { JwtHelperService } from "@auth0/angular-jwt"; //import jwt
   providedIn: 'root'
 })
 export class AuthService {
+  constructor(
+    private httpCLient: HttpClient,
+  ) { }
 
-  constructor(private httpCLient: HttpClient) { }
+  private jwtHelper: JwtHelperService = new JwtHelperService()
+
   login(credentials: any) {
     return this.httpCLient.post('/api/authenticate', credentials).pipe(
       map(
@@ -33,13 +37,17 @@ export class AuthService {
     if (!token) {
       return false;
     }
-    const jwtHelper = new JwtHelperService();
-    const [tokenExpDate, isExpired] = [jwtHelper.getTokenExpirationDate(token), jwtHelper.isTokenExpired(token)];
+    const [tokenExpDate, isExpired] = [this.jwtHelper.getTokenExpirationDate(token), this.jwtHelper.isTokenExpired(token)];
 
-    console.log('Ex. date: ', tokenExpDate);
-    console.log('isExpired: ', isExpired);
+    // console.log('Ex. date: ', tokenExpDate);
+    // console.log('isExpired: ', isExpired);
     return !isExpired;
   }
 
+  get currentUser() {
+    let token = localStorage.getItem('token');
+    if (!token) return null;
+    return this.jwtHelper.decodeToken(token);
+  }
 
 }
